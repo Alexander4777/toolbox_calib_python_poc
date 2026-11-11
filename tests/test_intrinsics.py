@@ -15,7 +15,6 @@ from calib import (
     rectify_image,
     undistort_points,
 )
-from calib.intrinsics import _col
 
 
 def test_camera_matrix_with_skew():

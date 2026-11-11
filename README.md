@@ -19,9 +19,36 @@ python -m venv .venv
 ```
 
 The package requires Python 3.10+ and depends on `numpy`, `scipy`,
-`opencv-python-headless` and `matplotlib`.
+`opencv-python-headless` and `matplotlib`. The graphical interface
+additionally needs `PySide6`.
 
-## Quick start
+## The graphical interface
+
+```bash
+python -m calib.gui          # or: python run_gui.py
+```
+
+The interface follows the workflow of the original MATLAB toolbox, one tab
+per step:
+
+| Tab | What it does |
+| --- | --- |
+| **Images** | Load the images of the calibration sequence. The list shows the number of corners and a checkbox to suppress a view. |
+| **Corners** | Pick the corners of the pattern. Click them in the image, or use **Auto-detect corners**. Right or middle drag pans, the wheel zooms, `F` fits the image, `Backspace` removes the last corner. |
+| **Model** | The geometry of the pattern (number of corners, spacing, depth of the plane) and the parameters to estimate (focal length, principal point, skew, distortion coefficients, iterations, damping). |
+| **Results** | The calibrated parameters with their uncertainties, the reprojection error of every view, and the undistortion of the current image. |
+
+The calibration runs in a worker thread, so the interface stays responsive.
+The results can be saved (`.npz`), reloaded and exported (JSON) from the
+**File** and **Calibration** menus.
+
+The automatic corner detector works on the usual calibration patterns (a
+grid of dark squares on a light background, or the opposite). It finds the
+blobs, separates the ones that touch, orders them like the pattern and
+refines them to sub-pixel accuracy. When it fails, the corners can be
+picked by hand.
+
+## The Python API
 
 ```python
 import numpy as np
@@ -56,6 +83,8 @@ the per-view homographies (`H`), the parameter uncertainties
 (`fc_error`, `cc_error`, `kc_error`, `alpha_c_error`) and a `project()`
 method to reproject points with a given view.
 
+A complete script is available in `example_workflow.py`.
+
 ## The camera model
 
 The toolbox uses the classical Bouguet model.  The world points `X` (a
@@ -87,6 +116,7 @@ The distortion coefficients are stored in the order `[k1, k2, p1, p2, k3]`
 | `calib.stereo` | `go_calib_stereo.m` |
 | `calib.io` | `saving_calib.m`, `loading_calib.m` |
 | `calib.images` | `undistort_image.m` |
+| `calib.gui` | The graphical interface (`calib_gui.m` and the corner picking of `click_calib.m`) |
 
 ## Notable differences from the MATLAB original
 
@@ -142,6 +172,13 @@ The test suite checks the analytic Jacobians against finite differences
 a known projection, and the full calibration on synthetic data with known
 intrinsic parameters, both for planar and for 3D targets, with and without
 lens distortion and with noise.
+
+The tests of the interface (`tests/test_gui.py` and
+`tests/test_gui_end_to_end.py`) run with the `offscreen` Qt platform, so
+they need no display. The end-to-end test renders realistic views of a
+calibration pattern, detects the corners automatically, runs the
+calibration through the interface and checks that the true parameters are
+recovered.
 
 ## License
 

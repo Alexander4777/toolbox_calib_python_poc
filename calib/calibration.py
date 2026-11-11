@@ -265,12 +265,17 @@ class CalibrationResult:
         Only the views that were actually used contribute; the errors of
         the deactivated views are ``NaN`` and are ignored.
         """
-        all_err = np.concatenate(
-            [e.reshape(-1) for e in self.errors if e.size and np.any(np.isfinite(e))]
-        )
+        chunks = [
+            e.reshape(-1) for e in self.errors if e.size and np.any(np.isfinite(e))
+        ]
+        if not chunks:
+            return float("nan")
+
+        all_err = np.concatenate(chunks)
+        all_err = all_err[np.isfinite(all_err)]
         if all_err.size == 0:
             return float("nan")
-        all_err = all_err[np.isfinite(all_err)]
+
         return float(np.sqrt(np.mean(all_err**2)))
 
     def project(self, X, view: int) -> np.ndarray:

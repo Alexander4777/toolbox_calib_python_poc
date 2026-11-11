@@ -25,7 +25,6 @@ import numpy as np
 from calib import (
     CalibrationData,
     CalibrationOptions,
-    camera_matrix,
     export_calibration_json,
     load_calibration,
     project_points,
@@ -187,7 +186,7 @@ def main():
         if 0 <= xi < w and 0 <= yi < h:
             image[yi, xi] = 255
 
-    undistorted = undistort_image(image, result)
+    undistort_image(image, result)
     print(
         f"\nUndistorted a {w}x{h} image: the pattern is now a regular grid."
     )

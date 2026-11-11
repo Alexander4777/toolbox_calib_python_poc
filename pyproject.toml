@@ -24,10 +24,14 @@ dependencies = [
 ]
 
 [project.optional-dependencies]
+gui = ["PySide6>=6.5"]
 dev = ["pytest>=7.0", "pyflakes>=3.0"]
 
+[project.scripts]
+calib-gui = "calib.gui.main_window:run"
+
 [tool.setuptools]
-packages = ["calib"]
+packages = ["calib", "calib.gui"]
 
 [tool.pytest.ini_options]
 testpaths = ["tests"]
